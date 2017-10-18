@@ -1,14 +1,11 @@
 #pragma once
-#include "cocos2d.h"
-#include "StaticData.h"
-USING_NS_CC;
-
-class FishLayer :
-	public CCLayer
+#include"cocos2d.h"
+/*”„≤„*/
+class FishLayer :public cocos2d::Layer
 {
 public:
-	FishLayer(void);
-	CREATE_FUNC(FishLayer)
-	virtual bool init();
-	virtual ~FishLayer(void);
+	FishLayer();
+	~FishLayer();
+	bool init();
 };
+

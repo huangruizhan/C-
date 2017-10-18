@@ -1,18 +1,20 @@
 #include "FishLayer.h"
 
-FishLayer::FishLayer(void)
+
+FishLayer::FishLayer()
+{
+}
+
+
+FishLayer::~FishLayer()
 {
 }
 
 bool FishLayer::init()
 {
-	if (!CCLayer::init())
+	if (!cocos2d::Layer::init())
 	{
 		return false;
 	}
 	return true;
-}
-
-FishLayer::~FishLayer(void)
-{
 }

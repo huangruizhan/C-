@@ -1,18 +1,28 @@
-#ifndef __FishingJoy__FishLayer__
-#define __FishingJoy__FishLayer__
+#pragma once
 #include "cocos2d.h"
-#include "Fish.h"
-class FishLayer : public cocos2d::CCLayer
+using namespace cocos2d;
+class FishLayer :
+	public CCLayer
 {
 public:
-    CREATE_FUNC(FishLayer);
-    bool init();
-    CC_SYNTHESIZE_READONLY(cocos2d::CCArray*, _fishes, Fishes);
-    ~FishLayer();
-	
-protected:
-    void addFish(float dt);
-	void resetFish(Fish* fish);
+	FishLayer(void);
+	/*static FishLayer *create()
+	{
+		FishLayer *layer = new FishLayer();
+		if (layer && layer->init())
+		{
+			layer->autorelease();
+			return layer;
+		}
+		else
+		{
+			delete layer;
+			layer = NULL;
+			return NULL;
+		}
+	}*/
+	CREATE_FUNC(FishLayer)
+	virtual bool init();
+	virtual ~FishLayer(void);
 };
 
-#endif

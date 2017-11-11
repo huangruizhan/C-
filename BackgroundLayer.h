@@ -1,16 +1,27 @@
-#ifndef __FishingJoy__BackgroundLayer__
-#define __FishingJoy__BackgroundLayer__
+#pragma once
 #include "cocos2d.h"
-#include "SelectScene.h"
-class BackgroundLayer:cocos2d::CCLayer
+using namespace cocos2d;
+class BackgroundLayer :public CCLayer
 {
 public:
-	CREATE_FUNC(BackgroundLayer);
-	bool init();
-	//SelectScene* init();
-	//SelectScene* transition();
-	//Background(void);
-	//~Background(void);
+	BackgroundLayer(void);
+	/*static BackgroundLayer *create();
+	{
+		BackgroundLayer *layer = new BackgroundLayer();
+		if (layer && layer->init())
+		{
+			layer->autorelease();
+			return layer;
+		}
+		else
+		{
+			delete layer;
+			layer = NULL;
+			return NULL;
+		}
+	}*/
+	CREATE_FUNC(BackgroundLayer)
+	virtual bool init();
+	virtual ~BackgroundLayer(void);
 };
-#endif
 

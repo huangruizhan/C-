@@ -1,131 +1,53 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
-
-#if USE_AUDIO_ENGINE && USE_SIMPLE_AUDIO_ENGINE
-#error "Don't use AudioEngine and SimpleAudioEngine at the same time. Please just select one in your game!"
-#endif
-
-#if USE_AUDIO_ENGINE
-#include "audio/include/AudioEngine.h"
-using namespace cocos2d::experimental;
-#elif USE_SIMPLE_AUDIO_ENGINE
-#include "audio/include/SimpleAudioEngine.h"
-using namespace CocosDenshion;
-#endif
+#include "Gamescene.h"
+#include "StartScene.h"
 
 USING_NS_CC;
 
-//����Ĭ�Ϸֱ��ʼ����ֳߴ��ֱ��ʣ���������
+AppDelegate::AppDelegate() {
 
-static cocos2d::Size designResolutionSize = cocos2d::Size(900,600);
-/*����*/
-static cocos2d::Size smallResolutionSize = cocos2d::Size(900,600);
-static cocos2d::Size mediumResolutionSize = cocos2d::Size(3048,2538);
-static cocos2d::Size largeResolutionSize = cocos2d::Size(2048, 1536);
+}
 
-AppDelegate::AppDelegate()
+AppDelegate::~AppDelegate() 
 {
 }
 
-AppDelegate::~AppDelegate()
-{
-#if USE_AUDIO_ENGINE
-    AudioEngine::end();
-#elif USE_SIMPLE_AUDIO_ENGINE
-    SimpleAudioEngine::end();
-#endif
-}
-
-//���� OpenGL�������������ö�����ƽ̨����Ч
-void AppDelegate::initGLContextAttrs()
-{
-	//����OpenGL context ����,Ŀǰֻ������6������
-	//red,green,blue,alpha,depth,stencil
-    GLContextAttrs glContextAttrs = {8, 8, 8, 8, 24, 8};
-
-    GLView::setGLContextAttrs(glContextAttrs);
-}
-
-
-static int register_all_packages()
-{
-    return 0;
-}
-
-//��Ӧ�ó�������ʱִ��,��Ϸ������������
-//���������������˵�һ��scen
 bool AppDelegate::applicationDidFinishLaunching() {
+    // initialize director
+    CCDirector* pDirector = CCDirector::sharedDirector();
+    CCEGLView* pEGLView = CCEGLView::sharedOpenGLView();
 
-	auto director = Director::getInstance();
-	/*glview���Ǵ����������Ĵ�Сview*/
-	auto glview = director->getOpenGLView();
+    pDirector->setOpenGLView(pEGLView);
+	
+    // turn on display FPS
+    pDirector->setDisplayStats(true);
 
-    if(!glview) {
-		/*GLViewImpl::createWithRect������Ļ��С*/
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-        glview = GLViewImpl::createWithRect("fishingJone", cocos2d::Rect(0, 0, designResolutionSize.width, designResolutionSize.height));
-#else
-        glview = GLViewImpl::create("fishingJone");
-#endif
-        director->setOpenGLView(glview);
-    }
-	/*�Ƿ���ʾ֡*/
-    director->setDisplayStats(true);
-	/*֡�Ĵ�С*/
-    director->setAnimationInterval(1.0f / 60);
+    // set FPS. the default value is 1.0/60 if you don't call this
+    pDirector->setAnimationInterval(1.0 / 60);
 
-	//�ֱ�������
-    glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
-    auto frameSize = glview->getFrameSize();
+    // create a scene. it's an autorelease object
+    //CCScene *pScene = HelloWorld::scene();
+	CCScene *pScene = StartLayer::create();
 
-   if (frameSize.height > mediumResolutionSize.height)
-    {
-        director->setContentScaleFactor(MIN(largeResolutionSize.height/designResolutionSize.height, largeResolutionSize.width/designResolutionSize.width));
-    }
-
-    else if (frameSize.height > smallResolutionSize.height)
-    {
-        director->setContentScaleFactor(MIN(mediumResolutionSize.height/designResolutionSize.height, mediumResolutionSize.width/designResolutionSize.width));
-    }
-
-    else
-    {
-        director->setContentScaleFactor(MIN(smallResolutionSize.height/designResolutionSize.height, smallResolutionSize.width/designResolutionSize.width));
-    }
-
-    register_all_packages();
-
-	//����һ��HelloWorld��scene���������еĵ�һ������
-    auto scene = HelloWorld::createScene();
-
-    director->runWithScene(scene);
+    // run
+    pDirector->runWithScene(pScene);
 
     return true;
 }
 
-// �л�����̨
+// This function will be called when the app is inactive. When comes a phone call,it's be invoked too
 void AppDelegate::applicationDidEnterBackground() {
-	//��ͣ��Ϸ
-    Director::getInstance()->stopAnimation();
+    CCDirector::sharedDirector()->stopAnimation();
 
-#if USE_AUDIO_ENGINE
-    AudioEngine::pauseAll();
-#elif USE_SIMPLE_AUDIO_ENGINE
-    SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
-    SimpleAudioEngine::getInstance()->pauseAllEffects();
-#endif
+    // if you use SimpleAudioEngine, it must be pause
+    // SimpleAudioEngine::sharedEngine()->pauseBackgroundMusic();
 }
 
-// �л���ǰ̨
+// this function will be called when the app is active again
 void AppDelegate::applicationWillEnterForeground() {
+    CCDirector::sharedDirector()->startAnimation();
 
-	//������Ϸ
-    Director::getInstance()->startAnimation();
-
-#if USE_AUDIO_ENGINE
-    AudioEngine::resumeAll();
-#elif USE_SIMPLE_AUDIO_ENGINE
-    SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
-    SimpleAudioEngine::getInstance()->resumeAllEffects();
-#endif
+    // if you use SimpleAudioEngine, it must resume here
+    // SimpleAudioEngine::sharedEngine()->resumeBackgroundMusic();
 }

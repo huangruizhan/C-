@@ -1,39 +1,56 @@
 #include "PersonalAudioEngine.h"
-#include "FishingJoyData.h"
-#include "StaticData.h"
-static PersonalAudioEngine* _sharedEngine = NULL;
-using namespace CocosDenshion;
+#include "FishJoyData.h"
 USING_NS_CC;
-void PersonalAudioEngine::setBackgroundMusicVolume(float volume)
+static PersonalAudioEngine *_sharedEngine=NULL;
+PersonalAudioEngine* PersonalAudioEngine::getInstance()
 {
-    SimpleAudioEngine::sharedEngine()->setBackgroundMusicVolume(volume);
-    FishingJoyData::sharedFishingJoyData()->setMusicVolume(volume);
+	if(_sharedEngine==NULL)
+	{
+		_sharedEngine=new PersonalAudioEngine;
+		_sharedEngine->init();
+
+	}
+	return _sharedEngine;
 }
-void PersonalAudioEngine::setEffectsVolume(float volume)
+void PersonalAudioEngine::destoryIntance()
 {
-    SimpleAudioEngine::sharedEngine()->setEffectsVolume(volume);
-    FishingJoyData::sharedFishingJoyData()->setSoundVolume(volume);
+	//delete _sharedEngine;
+	//_sharedEngine=NULL;
+	CC_SAFE_DELETE(_sharedEngine);
 }
-PersonalAudioEngine* PersonalAudioEngine::sharedEngine()
+PersonalAudioEngine::PersonalAudioEngine()
 {
-    if(_sharedEngine==NULL){
-        _sharedEngine = new PersonalAudioEngine();
-        _sharedEngine->init();
-    }
-    return _sharedEngine;
+}
+PersonalAudioEngine::~PersonalAudioEngine()
+{
 }
 bool PersonalAudioEngine::init()
 {
-    this->preloadBackgroundMusic(STATIC_DATA_STRING("bg_music"));
-    this->preloadEffect(STATIC_DATA_STRING("sound_button"));
-    this->preloadEffect(STATIC_DATA_STRING("sound_shot"));
-
-    this->setBackgroundMusicVolume(FishingJoyData::sharedFishingJoyData()->getMusicVolume());
-    this->setEffectsVolume(FishingJoyData::sharedFishingJoyData()->getSoundVolume());
-    
-    return true;
+	this->preloadBackgroundMusic("music_1.mp3");
+	this->preloadBackgroundMusic("music_3.mp3");
+	this->preloadBackgroundMusic("music_6.mp3");
+	this->preloadEffect("bgm_button.aif");
+	this->preloadEffect("bgm_fire.aif");
+	this->preloadEffect("bgm_net.mp3");
+	return true;
 }
-void PersonalAudioEngine::purge()
+void PersonalAudioEngine::playBackgroundMusic(int type)
 {
-
+	CCString *fileName =CCString::createWithFormat("music_%d.mp3",type);
+	SimpleAudioEngine::playBackgroundMusic(fileName->getCString());
+}
+void PersonalAudioEngine::playEffect(EffectType type)
+{
+	switch(type)
+	{
+	case kEffectFishNet:
+		SimpleAudioEngine::playEffect("bgm_net.mp3");
+		break;
+	case kEffectShoot:
+		SimpleAudioEngine::playEffect("bgm_fire.aif");
+		break;
+	case kEffectSwichCannon: 
+		SimpleAudioEngine::playEffect("bgm_button.aif");
+		break;
+	}
 }

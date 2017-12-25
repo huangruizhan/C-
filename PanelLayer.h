@@ -1,19 +1,23 @@
-#ifndef __FishingJoy__PanelLayer__
-#define __FishingJoy__PanelLayer__
+#pragma once
 #include "cocos2d.h"
 #include "GoldCounterLayer.h"
-#include "ScheduleCounterProtocol.h"
-class PanelLayer : public cocos2d::CCLayer ,public ScheduleCounterDelegate
+#include "ScheduleCounterDelegate.h"
+#include "ScheduleCountDown.h"
+USING_NS_CC;
+
+class PanelLayer:public cocos2d::CCLayer,public ScheduleCounterDelegate
 {
 public:
-    CREATE_FUNC(PanelLayer);
-    bool init();
-    CC_SYNTHESIZE_READONLY(GoldCounterLayer*, _goldCounterLayer, GoldCounterLayer);    
-    void __stdcall scheduleTimeUp();
-    void __stdcall setScheduleNumber(int number);
+	virtual bool init();
+	PanelLayer(void);
+	~PanelLayer(void);
+
+    CREATE_FUNC(PanelLayer)
+    CC_SYNTHESIZE_READONLY(GoldCounterLayer *, _goldCounter, GoldCounter)
+
 protected:
-    void pause(cocos2d::CCObject* pSender);
-    cocos2d::CCLabelTTF* _scheduleLabel;
+	virtual void scheduleTimeUp();
+	virtual void setScheduleNumber(int number);
+	CCLabelAtlas *_scheduleLabel;
 };
 
-#endif 

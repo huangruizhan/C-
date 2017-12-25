@@ -1,21 +1,26 @@
-
-#ifndef __FishingJoy__PersonalAudioEngine__
-#define __FishingJoy__PersonalAudioEngine__
+#ifndef PERSONALAUDIOENGINE_H
+#define PERSONALAUDIOENGINE_H
 #include "SimpleAudioEngine.h"
-#include "cocos2d.h"
-class PersonalAudioEngine : public CocosDenshion::SimpleAudioEngine
+
+typedef enum{
+	kEffectSwichCannon = 0,
+	kEffectShoot,
+	kEffectFishNet,
+	kEffectCoins
+}EffectType;
+
+class PersonalAudioEngine:public CocosDenshion::SimpleAudioEngine
 {
 public:
-    void setBackgroundMusicVolume(float volume);
-    void setEffectsVolume(float volume);
-    
-    static PersonalAudioEngine* sharedEngine();
-    
-    void purge();
-    bool init();
+	static PersonalAudioEngine *getInstance();
+	static void destoryIntance();
+	void playBackgroundMusic(int type);
+	void playEffect(EffectType type);
 protected:
-    //PersonalAudioEngine();
-    //~PersonalAudioEngine();
+	bool init();
+	PersonalAudioEngine();
+	~PersonalAudioEngine();
+	PersonalAudioEngine(const PersonalAudioEngine& engine);
+private:
 };
-
-#endif 
+#endif

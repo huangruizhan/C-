@@ -1,42 +1,60 @@
 #include "GoldCounterLayer.h"
 #include "Counter.h"
-USING_NS_CC;
+#include "StaticData.h"
+#define NUM_COUNTER 7
+
 GoldCounterLayer* GoldCounterLayer::create(int number)
 {
-    GoldCounterLayer* goldCounterLayer = new GoldCounterLayer();
-    goldCounterLayer->init(number);
-    goldCounterLayer->autorelease();
-    return goldCounterLayer;
+    GoldCounterLayer* gold = new GoldCounterLayer();
+	if (gold && gold->init(number))
+	{
+		gold->autorelease();
+		return gold;
+	}
+	else
+	{
+		CC_SAFE_DELETE(gold);
+		return NULL;
+	}
 }
 bool GoldCounterLayer::init(int number)
 {
-    int fontSize = 16;
-    CCLabelTTF* goldLabel = CCLabelTTF::create("½ð±Ò:", "Thonburi", fontSize);
-    this->addChild(goldLabel);
-    CCSize goldLabelSize = goldLabel->getContentSize();
+	if(!CCNode::init())
+	{
+		return false;
+	}
+    CCTexture2D * texture = CCTextureCache::sharedTextureCache()->addImage("ui_text_01-ipadhd.png");
+	CCSize textureSize = texture->getContentSize();
     
-    for(int i = 0 ;i < 6;i++){
-        int count = 10;
-        CCArray* presenters = CCArray::createWithCapacity(count);
-        for(int j = 0;j < count;j++){
-            CCLabelTTF* label = CCLabelTTF::create(CCString::createWithFormat("%d",j)->getCString(), "Thonburi", fontSize);
-            presenters->addObject(label);
+    for(int i = 0 ;i < NUM_COUNTER;i++){
+        CCArray* array = CCArray::createWithCapacity(10);
+		float digitSize = textureSize.width/ 10;
+        for(int j = 0;j < 10;j++){
+            int x = digitSize * j;
+			CCSprite *sprite = CCSprite::createWithTexture(texture,CCRect(x,0,digitSize,textureSize.height));
+			array->addObject(sprite);
         }
-        Counter* counter = Counter::create(presenters);
-        counter->setPosition(CCPointMake(goldLabelSize.width*0.8+fontSize*0.75*i, 0));
-        this->addChild(counter, 0, i);
+        Counter* counter = Counter::create(array);
+		addChild(counter,0,i);
+        counter->setPosition(i * digitSize,0);
     }
-    this->setNumber(number);
+    setNumber(number);
     return true;
 }
-void GoldCounterLayer::setNumber(int number, int ceiling)
+void GoldCounterLayer::setNumber(int number, int ceiling /*= 999999*/)
 {
-    number = MIN(ceiling, number);
-    number = MAX(number, 0);
-    int _number = number;
-    for(int i = 0 ;i < 6;i++){
-        Counter* counter = (Counter*)this->getChildByTag(i);
-        int digit = _number / (int)(pow(10.0, 6-i-1)) % 10;
-        counter->setDigit(digit);
+    if (number > ceiling)
+    {
+		number = ceiling;
     }
+	if (number < 0)
+	{
+		number = 0;
+	}
+	for (int i = NUM_COUNTER -1; i >=0; i--)
+	{
+		Counter * counter = (Counter*)getChildByTag(i);
+		counter->setDigit((number % 10));
+		number /= 10;
+	}
 }

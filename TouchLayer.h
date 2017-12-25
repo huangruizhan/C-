@@ -1,24 +1,21 @@
-#ifndef __FishingJoy__TouchLayer__
-#define __FishingJoy__TouchLayer__
+#pragma once
 #include "cocos2d.h"
 
+USING_NS_CC;
 class GameScene;
-
-class TouchLayer : public cocos2d::CCLayer
+class TouchLayer :
+	public CCLayer
 {
 public:
-    CREATE_FUNC(TouchLayer);
-    bool init();
-    bool ccTouchBegan(cocos2d::CCTouch *pTouch, cocos2d::CCEvent *pEvent);
-    void ccTouchMoved(cocos2d::CCTouch *pTouch, cocos2d::CCEvent *pEvent);
-    void ccTouchEnded(cocos2d::CCTouch *pTouch, cocos2d::CCEvent *pEvent);
-    
-    //¿ªÆô¡¢¹Ø±Õ´¥ÃþµÄ½Ó¿Ú
-    void setTouchEnabled(bool flag);
+	TouchLayer(void);
+	virtual ~TouchLayer(void);
+	CREATE_FUNC(TouchLayer);
+	bool init();
 protected:
-    GameScene* getGameScene();
-    cocos2d::CCPoint locationFromTouch(cocos2d::CCTouch *touch);
-
+	virtual bool ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent);
+	virtual void ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent);
+	virtual void ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent);
+	virtual void registerWithTouchDispatcher();
+	GameScene* getGameScene(); 
 };
 
-#endif 

@@ -1,185 +1,185 @@
 #include "GameScene.h"
-#include "StaticData.h"
-#include "FishingJoyData.h"
-#include "StartScene.h"
-#include "GoldCounterLayer.h"
-#include "PersonalAudioEngine.h"
-//#include "ScheduleCountDown.h"
-USING_NS_CC;
-void GameScene::onEnterTransitionDidFinish()
+//#include "FishJoyData.h"
+GameScene::GameScene()
 {
-    CCScene::onEnterTransitionDidFinish();
-    PersonalAudioEngine::sharedEngine()->playBackgroundMusic(STATIC_DATA_STRING("bg_music"),true);
 }
+
 bool GameScene::init()
 {
-    //preloadResources();	
-    if(CCScene::init()){
-		CCSize winSize = CCDirector::sharedDirector()->getWinSize();        
-        CCSprite* background = CCSprite::create(STATIC_DATA_STRING("game_background_01"));
-		background->setScale(1);
-        background->setPosition(CCPointMake(winSize.width*0.5, winSize.height*0.5));
-        this->addChild(background);
-        
-        _fishLayer = FishLayer::create();
-        this->addChild(_fishLayer);
-        
-        _cannonLayer = CannonLayer::create();
-        this->addChild(_cannonLayer);
-        
-        _panelLayer = PanelLayer::create();
-        this->addChild(_panelLayer);
-
-        _menuLayer = MenuLayer::create();
-        CC_SAFE_RETAIN(_menuLayer);
-
-			
-		_panelLayer->getGoldCounterLayer()->setNumber(FishingJoyData::sharedFishingJoyData()->getGold());
-
-		_touchLayer=TouchLayer::create();
+	do
+	{
+		CC_BREAK_IF(!CCScene::init());
+		preloadResources();
+		//因为~GameScene()中需要CC_SAFE_RELEASE(_menuLayer)， 如果其它层创建失败，_menuLayer将不创建，
+		//所以_menuLayer要先于其他层创建， 否则将报 "reference count greater than 0" 错误
+		_menuLayer = MenuLayer::create(); 
+		CC_BREAK_IF(!_menuLayer);
+		CC_SAFE_RETAIN(_menuLayer); 
+		_backgroundLayer = BackgroundLayer::create();
+		CC_BREAK_IF(!_backgroundLayer);
+		this->addChild(_backgroundLayer);
+		_fishLayer = FishLayer::create();
+		CC_BREAK_IF(!_fishLayer);
+		this->addChild(_fishLayer);
+		_cannonLayer = CannonLayer::create();
+		CC_BREAK_IF(!_cannonLayer);
+		this->addChild(_cannonLayer);
+		_touchLayer = TouchLayer::create();
+		CC_BREAK_IF(!_touchLayer);
 		this->addChild(_touchLayer);
-        this->scheduleUpdate();
-        return true;
-    }
-    return false;
+		_paneLayer = PanelLayer::create();
+		CC_BREAK_IF(!_paneLayer);
+		this->addChild(_paneLayer);
+		_paneLayer->getGoldCounter()->setNumber(FishJoyData::getInstance()->getGold());
+		this->scheduleUpdate();
+		return true;
+	} while (0);
+	return false;
 }
-void GameScene::pause()
+
+void GameScene::preloadResources(void)
 {
-    this->operateAllSchedulerAndActions(this, k_Operate_Pause);
-    this->addChild(_menuLayer);
+	PersonalAudioEngine::getInstance();
+	CCSpriteFrameCache* spriteFrameCache = CCSpriteFrameCache::sharedSpriteFrameCache();
+	//修改以下plist文件， 删除key中的中文， 否则spriteFrameByName函数无法找到Frame，将返回NULL
+	spriteFrameCache->addSpriteFramesWithFile("FishActor-Large-ipadhd.plist");		//修改metadata->realTextureFileName->FishActor-Large-ipadhdhd.png, textureFileName->FishActor-Large-ipadhd.png
+	spriteFrameCache->addSpriteFramesWithFile("FishActor-Marlin-ipadhd.plist");		//修改metadata->realTextureFileName->FishActor-Marlin-ipadhdhd.png, textureFileName->FishActor-Marlin-ipadhd.png
+	spriteFrameCache->addSpriteFramesWithFile("FishActor-Shark-ipadhd.plist");		//同上
+	spriteFrameCache->addSpriteFramesWithFile("FishActor-Small-ipadhd.plist");		//同上
+	spriteFrameCache->addSpriteFramesWithFile("FishActor-Mid-ipadhd.plist");			//同上
+	spriteFrameCache->addSpriteFramesWithFile("cannon-ipadhd.plist");
+	spriteFrameCache->addSpriteFramesWithFile("Item-chaojiwuqi-ipadhd.plist");
+
+	CCTextureCache *textureCache = CCTextureCache::sharedTextureCache();
+	textureCache->addImage("ui_button_63-ipadhd.png");
+	textureCache->addImage("ui_button_65-ipadhd.png");
+
+	char str[][50] = { "SmallFish", "Croaker", "AngelFish", "Amphiprion", "PufferS", 
+		"Bream", "Porgy", "Chelonian", "Lantern", "Ray", "Shark", "GoldenTrout", "GShark", 
+		"GMarlinsFish", "GrouperFish", "JadePerch", "MarlinsFish", "PufferB" };
+	for (int i = 0; i < 18; i++)
+	{
+		CCArray* array = CCArray::createWithCapacity(10);
+		for (int j = 0; j < 10; j++)
+		{
+			CCString* spriteFrameName = CCString::createWithFormat("%s_actor_%03d.png", str[i], j + 1);
+			CCSpriteFrame* spriteFrame = spriteFrameCache->spriteFrameByName(spriteFrameName->getCString());
+			CC_BREAK_IF(!spriteFrame);
+			array->addObject(spriteFrame);
+		}
+		if (array->count() == 0)
+		{
+			continue;
+		}
+		CCAnimation* animation = CCAnimation::createWithSpriteFrames(array, 0.15f);
+		CCString* animationName = CCString::createWithFormat("fish_animation_%02d", i + 1);
+		CCAnimationCache::sharedAnimationCache()->addAnimation(animation, animationName->getCString());
+	}
+	
 }
-void GameScene::resume()
-{
-    this->operateAllSchedulerAndActions(this, k_Operate_Resume);
-    this->removeChild(_menuLayer, false);
-}
-void GameScene::sound()
-{
-	bool flag = FishingJoyData::sharedFishingJoyData()->getSoundVolume()>0;
-    PersonalAudioEngine::sharedEngine()->setEffectsVolume(!flag);
-}
-void GameScene::music()
-{
-	bool flag = FishingJoyData::sharedFishingJoyData()->getMusicVolume()>0;
-    PersonalAudioEngine::sharedEngine()->setBackgroundMusicVolume(!flag);
-}
-void GameScene::reset()
-{
-	this->removeChild(_menuLayer,false);
-	CCDirector::sharedDirector()->replaceScene(GameScene::create()); 
-}
-void GameScene::transToMainMenu()
-{
-	CCDirector::sharedDirector()->replaceScene(StartLayer::scene()); 
-}
+
 GameScene::~GameScene()
 {
-    CC_SAFE_RELEASE(_menuLayer);
-}
-void GameScene::alterGold(int delta)
-{
-    FishingJoyData::sharedFishingJoyData()->alterGold(delta);
-    _panelLayer->getGoldCounterLayer()->setNumber(FishingJoyData::sharedFishingJoyData()->getGold());
-}
-void GameScene::scheduleTimeUp()
-{
- this->alterGold(STATIC_DATA_INT("recovery_gold"));
+	CC_SAFE_RELEASE(_menuLayer);
 }
 
 void GameScene::cannonAimAt(CCPoint target)
 {
-    _cannonLayer->aimAt(target);
+	_cannonLayer->aimAt(target);
 }
+
 void GameScene::cannonShootTo(CCPoint target)
 {
-    _cannonLayer->shootTo(target);
-    PersonalAudioEngine::sharedEngine()->playEffect(STATIC_DATA_STRING("sound_shot"));
+	int cost = _cannonLayer->getWeapon()->getCannonType() + 1;
+	if (FishJoyData::getInstance()->getGold() >= cost)
+	{
+		_cannonLayer->shootTo(target);
+		alterGold(-cost);
+	}
+
+	//_cannonLayer->shootTo(target);
 }
-void GameScene::update(float delat)
+
+bool GameScene::checkOutCollisionBetweenFishesAndBullet(Bullet* bullet)
 {
-    checkOutCollision();
+	CCPoint bulletPos = bullet->getCollosionPoint();
+	CCArray* fishArray = _fishLayer->getFishArray();
+	CCObject* obj = NULL;
+	CCARRAY_FOREACH(fishArray, obj)
+	{
+		Fish* fish =(Fish*)obj;
+		if(fish->isRunning() && fish->getCollisionArea().containsPoint(bulletPos))
+		{
+			bullet->end();
+			return true;
+		}
+	}
+	return false;
 }
+
 void GameScene::checkOutCollision()
 {
-    Weapon* weapon = _cannonLayer->getWeapon();
-    if(weapon->weaponStatus() == k_Weapon_Status_Bullet){
-        bool flag =this->checkOutCollisionBetweenFishesAndBullet();
-        if(flag){
-           this->checkOutCollisionBetweenFishesAndFishingNet();
-        }
-    }
+	CCArray* bullets = _cannonLayer->getWeapon()->getBullets();
+	CCObject* obj = NULL;
+	CCARRAY_FOREACH(bullets, obj)
+	{
+		Bullet* bullet = (Bullet*)obj;
+		if(bullet->isVisible())
+		{
+			if(checkOutCollisionBetweenFishesAndBullet(bullet))
+			{
+				checkOutCollisionBetweenFishesAndFishingNet(bullet);
+			}
+		}
+	}	
 }
-bool GameScene::checkOutCollisionBetweenFishesAndBullet()
+
+void GameScene::update(float delta)
 {
-    Weapon* weapon = _cannonLayer->getWeapon();
-    CCPoint bulletCollision = weapon->getCollisionPoint();
-    CCArray* fishes = _fishLayer->getFishes();
-    CCObject* iterator;
-    CCARRAY_FOREACH(fishes, iterator){
-        Fish* fish = (Fish*)iterator;
-        //isRunnning判断fish是否已经在屏幕上显示
-        if(fish->isRunning()){
-            CCRect fishCollisionArea = fish->getCollisionArea();
-            bool isCollision = fishCollisionArea.containsPoint(bulletCollision);
-            if(isCollision){
-                weapon->end();
-                return true;
-            }
-        }
-    }
-    return false;
+	checkOutCollision();
 }
-void GameScene::checkOutCollisionBetweenFishesAndFishingNet()
-{
-    Weapon* weapon = _cannonLayer->getWeapon();
-    CCRect bulletCollision = weapon->getCollisionArea();
-    CCArray* fishes = _fishLayer->getFishes();
-    CCObject* iterator;
-    CCARRAY_FOREACH(fishes, iterator){
-        Fish* fish = (Fish*)iterator;
-        //isRunnning判断fish是否已经在屏幕上显示
-        if(fish->isRunning()){
-            CCRect fishCollisionArea = fish->getCollisionArea();
-            bool isCollision = fishCollisionArea.intersectsRect(bulletCollision);
-            if(isCollision){
-                this->fishWillBeCaught(fish);
-            }
-        }
-    }
-}
+
 void GameScene::fishWillBeCaught(Fish* fish)
 {
-    int weaponType = _cannonLayer->getWeapon()->getCannonType();
-    int fishType = fish->getType();
-    float fish_percentage = STATIC_DATA_FLOAT(CCString::createWithFormat(STATIC_DATA_STRING("fish_percentage_format"),fishType)->getCString());
-    float weapon_percentage = STATIC_DATA_FLOAT(CCString::createWithFormat(STATIC_DATA_STRING("weapon_percentage_format"),weaponType)->getCString());
-    float percentage = weapon_percentage * fish_percentage;
-   // if(CCRANDOM_0_1() < percentage){
-        fish->beCaught();
-  //  }
-		 int reward = STATIC_DATA_INT(CCString::createWithFormat(STATIC_DATA_STRING("reward_format"),fishType)->getCString());
-        this->alterGold(reward);
+	float weaponPercents[k_Cannon_Count] = { 0.3, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1 };
+	float fishPercents[	k_Fish_Type_Count] = { 1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4 };
+	int _cannonType = _cannonLayer->getWeapon()->getCannonType();
+	int _fishType = fish->getType();
+	float percentage =(float)_cannonType * _fishType;
+	if(CCRANDOM_0_1() < percentage)//1.1
+	{
+		fish->beCaught();
+		//
+		int reward = STATIC_DATA_INT(CCString::createWithFormat(STATIC_DATA_STRING("reward_format"),_fishType)->getCString());
+		alterGold(reward);
+		//
+	}
+	
 }
-void GameScene::operateAllSchedulerAndActions(cocos2d::CCNode* node, OperateFlag flag)
+
+void GameScene::checkOutCollisionBetweenFishesAndFishingNet(Bullet* bullet)
 {
-    if(node->isRunning()){
-        switch (flag) {
-            case k_Operate_Pause:
-                node->pauseSchedulerAndActions();
-                break;
-            case k_Operate_Resume:
-                node->resumeSchedulerAndActions();
-                break;
-            default:
-                break;
-        }
-        CCArray* array = node->getChildren();
-        if(array != NULL && array->count()>0){
-            CCObject* iterator;
-            CCARRAY_FOREACH(array, iterator){
-                CCNode* child = (CCNode*)iterator;
-                this->operateAllSchedulerAndActions(child, flag);
-            }
-        }
-    }
+	Weapon* weapon = _cannonLayer->getWeapon();
+	CCRect rect = weapon->getCollisionArea(bullet);
+	CCArray* fishArray = _fishLayer->getFishArray();
+	CCObject* obj = NULL;
+	CCARRAY_FOREACH(fishArray, obj)
+	{
+		Fish* fish = (Fish*)obj;
+		if(fish->isRunning() && rect.intersectsRect(fish->getCollisionArea()))
+		{
+			fishWillBeCaught(fish);
+		}
+	}
+}
+void GameScene::alterGold(int delta)
+{
+	FishJoyData* _fishJoyData = FishJoyData::getInstance();
+	_fishJoyData->alterGold(delta);
+	_paneLayer->getGoldCounter()->setNumber(_fishJoyData->getGold());
+}
+void GameScene::onEnter()
+{
+	CCScene::onEnter();
+	PersonalAudioEngine::getInstance()->playBackgroundMusic(3);
 }

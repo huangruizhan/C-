@@ -1,15 +1,19 @@
-#ifndef __FishingJoy__GoldCounter__
-#define __FishingJoy__GoldCounter__
+#ifndef _GOLDCOUNTERLAYER_H
+#define _GOLDCOUNTERLAYER_H
 #include "cocos2d.h"
-class GoldCounterLayer : public cocos2d::CCNode
+
+USING_NS_CC;
+
+class GoldCounterLayer:
+	public CCNode
 {
 public:
     static GoldCounterLayer* create(int number = 0);
-    bool init(int number = 0);
     void setNumber(int number,int ceiling = 999999);
-    CC_SYNTHESIZE_READONLY(int, _number, Number);
+
 protected:
-    void getNumAtPos(int pos);
+	bool init(int number = 0);
+	int _number;
 };
 
 #endif

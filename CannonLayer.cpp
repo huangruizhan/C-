@@ -1,39 +1,58 @@
 #include "CannonLayer.h"
-#include "StaticData.h"
-USING_NS_CC;
+
+CannonLayer::CannonLayer(void)
+{
+}
+
+CannonLayer::~CannonLayer(void)
+{
+}
+
 bool CannonLayer::init()
 {
-    if(CCLayer::init()){
-        CCSize winSize = CCDirector::sharedDirector()->getWinSize();
-        _weapon = Weapon::create();
-        _weapon->setPosition(winSize.width*0.5, _weapon->getCannon()->getCurCannonSprite()->getContentSize().height*0.26);
-        this->addChild(_weapon);
-        
-        _subItem = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName(STATIC_DATA_STRING("button_sub")), CCSprite::createWithSpriteFrameName(STATIC_DATA_STRING("button_sub")), this, menu_selector(CannonLayer::switchCannon));
-        _addItem = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName(STATIC_DATA_STRING("button_add")), CCSprite::createWithSpriteFrameName(STATIC_DATA_STRING("button_add")), this, menu_selector(CannonLayer::switchCannon));
-        CCMenu* menu = CCMenu::create(_subItem, _addItem, NULL);
-        menu->alignItemsHorizontallyWithPadding(_weapon->getCannon()->getCurCannonSprite()->getContentSize().width+10);
-        menu->setPosition(CCPointMake(winSize.width*0.5, _subItem->getContentSize().height*0.5));
-        this->addChild(menu);
-        return true;
-    }
-    return false;
+	if(!CCLayer::init())
+	{
+		return false;
+	}
+	_weapon = Weapon::create((CannonType)0);
+	addChild(_weapon,1);
+	CCSize winSize=CCDirector::sharedDirector()->getWinSize();
+	_weapon->setPosition(ccp(winSize.width/2 - 18, 0));
+
+	_addMenuItem = CCMenuItemImage::create(
+		"ui_button_65-ipadhd.png",
+		"ui_button_65-ipadhd.png",
+		this,menu_selector(CannonLayer::switchCannonCallback));
+
+	_subMenuItem = CCMenuItemImage::create(
+		"ui_button_63-ipadhd.png",
+		"ui_button_63-ipadhd.png",
+		this,menu_selector(CannonLayer::switchCannonCallback));
+
+	CCMenu* menu = CCMenu::create(_subMenuItem, _addMenuItem, NULL);
+	menu->alignItemsHorizontallyWithPadding(120);
+	addChild(menu,0);
+	menu->setPosition(ccp(winSize.width/2-20, _addMenuItem->getContentSize().height/2));
+	return true;
 }
-void CannonLayer::switchCannon(CCObject* sender)
+
+void CannonLayer::switchCannonCallback(cocos2d::CCObject* sender)
 {
-    CannonType type = _weapon->getCannon()->getType();
-    if(sender == _addItem){
-        type = (CannonType)((int)type+1);
-    }else if(sender == _subItem){
-        type = (CannonType)((int)type-1);
-    }
-    _weapon->getCannon()->setType(type);
+	CannonOperate operate = k_Cannon_Operate_Up;
+	if((CCMenuItemImage*)sender == _subMenuItem)
+	{
+		operate = k_Cannon_Operate_Down;
+	}
+	_weapon->changeCannon(operate);
+
 }
+
 void CannonLayer::aimAt(CCPoint target)
 {
-    _weapon->aimAt(target);
+	_weapon->aimAt(target);
 }
-bool CannonLayer::shootTo(CCPoint target)
+
+void CannonLayer::shootTo(CCPoint target)
 {
-    return _weapon->shootTo(target);
+	_weapon->shootTo(target);
 }

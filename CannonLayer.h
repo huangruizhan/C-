@@ -1,21 +1,22 @@
-#ifndef __FishingJoy__CannonLayer__
-#define __FishingJoy__CannonLayer__
+#pragma once
 #include "cocos2d.h"
 #include "Weapon.h"
-class CannonLayer : public cocos2d::CCLayer
+
+#define _CANNONLAYER_H
+
+class CannonLayer :
+	public CCLayer
 {
 public:
-    CREATE_FUNC(CannonLayer);
-    bool init();
-    CC_SYNTHESIZE_READONLY(Weapon*, _weapon, Weapon);
-    
-    bool shootTo(cocos2d::CCPoint touchLocation);
-    void aimAt(cocos2d::CCPoint target);
+	CannonLayer(void);
+	virtual ~CannonLayer(void);
+	virtual bool init();
+	void switchCannonCallback(cocos2d::CCObject* sender);
+	CREATE_FUNC(CannonLayer);
+	CC_SYNTHESIZE_READONLY(Weapon*, _weapon, Weapon);
+	void aimAt(CCPoint target);
+	void shootTo(CCPoint target);
 protected:
-
-    void switchCannon(cocos2d::CCObject* sender);
-    cocos2d::CCMenuItemSprite* _subItem;
-    cocos2d::CCMenuItemSprite* _addItem;
+	CCMenuItemImage *_addMenuItem, *_subMenuItem;
 };
 
-#endif 

@@ -1,18 +1,22 @@
-#ifndef __FishingJoy__FishLayer__
-#define __FishingJoy__FishLayer__
+#pragma once
 #include "cocos2d.h"
+#include "StaticData.h"
 #include "Fish.h"
-class FishLayer : public cocos2d::CCLayer
+USING_NS_CC;
+
+#define FISH_MAX_COUNT 50
+
+class FishLayer :
+	public CCLayer
 {
 public:
-    CREATE_FUNC(FishLayer);
-    bool init();
-    CC_SYNTHESIZE_READONLY(cocos2d::CCArray*, _fishes, Fishes);
-    ~FishLayer();
-	
+	FishLayer(void);
+	CREATE_FUNC(FishLayer)
+	virtual bool init();
+	virtual ~FishLayer(void);
+	CCArray* getFishArray();
 protected:
-    void addFish(float dt);
+	CCArray* _fishes;
+	void addFish(float delta);
 	void resetFish(Fish* fish);
 };
-
-#endif

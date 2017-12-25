@@ -1,61 +1,98 @@
 #include "Cannon.h"
-#include "StaticData.h"
+#include <cmath>
 USING_NS_CC;
+using namespace std;
+
+Cannon::Cannon(void)
+{
+}
+
+Cannon::~Cannon(void)
+{
+}
+
 Cannon* Cannon::create(CannonType type)
 {
-    Cannon* cannon = new Cannon();
-    cannon->init(type);
-    cannon->autorelease();
-    return cannon;
+	Cannon* _cannon = new Cannon();
+	if(_cannon && _cannon->init(type))
+	{
+		_cannon->autorelease();
+		return _cannon;
+	}
+	else
+	{
+		CC_SAFE_DELETE(_cannon);
+		return NULL;
+	}
 }
+
 bool Cannon::init(CannonType type)
 {
-	CCSpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("fishingjoy_resource.plist");
-    _cannonSprites = CCArray::createWithCapacity(k_Cannon_Type_Count);
-    _cannonSprites->retain();
-    CCPoint anchorPoints = CCPointMake(0.5, 0.26);
-    for(int i = k_Cannon_Type_1;i < k_Cannon_Type_Count;i++){
-        CCString* fileName = CCString::createWithFormat(STATIC_DATA_STRING("cannon_level_name_format"), i+1);
-        CCSprite* cannonSprite = CCSprite::createWithSpriteFrameName(fileName->getCString());
-        cannonSprite->setAnchorPoint(anchorPoints);
-        _cannonSprites->addObject(cannonSprite);
-    }
-    this->setType(type);
-    return true;
+	if(!CCNode::init()){
+		return false;
+	}
+	_cannonSprites = CCArray::createWithCapacity(k_Cannon_Count);
+	for(int i = k_Cannon_Type_1; i < k_Cannon_Count; i++)
+	{	
+		CCString* fileName = CCString::createWithFormat("actor_cannon1_%d1.png", i+1);
+		CCSprite* cannonSprite = CCSprite::createWithSpriteFrameName(fileName->getCString());
+		_cannonSprites->addObject(cannonSprite);
+		cannonSprite->setAnchorPoint(ccp(0.5,0.18));
+	}
+	CC_SAFE_RETAIN(_cannonSprites);
+	setType(type);
+	return true;
 }
-void Cannon::setType(CannonType type)
-{
-    if(_type != type){
-        if(type >= k_Cannon_Type_Count){
-            type = k_Cannon_Type_1;
-        }else if(type < k_Cannon_Type_1){
-            type = (CannonType)(k_Cannon_Type_Count-1);
-        }
-        this->removeChildByTag(_type, false);
-        CCSprite* newCannonSprite = (CCSprite*)_cannonSprites->objectAtIndex(type);
-        this->addChild(newCannonSprite, 0, type);
-        _type = type;
-    }
-}
-CCSprite* Cannon::getCurCannonSprite()
-{
-    return (CCSprite*)_cannonSprites->objectAtIndex(_type);
-}
+
 CannonType Cannon::getType()
 {
-    return _type;
+	return _type;
 }
+
+void Cannon::setType(CannonType var)
+{
+	if(_type == var)
+	{
+		return;
+	}
+	if(var < k_Cannon_Type_1)
+	{
+		var = (CannonType)(k_Cannon_Count-1);
+	}else if(var >= k_Cannon_Count)
+	{
+		var = k_Cannon_Type_1;
+	}
+	removeChildByTag(_type);
+	CCSprite* sprite = (CCSprite*) _cannonSprites->objectAtIndex(var);
+	addChild(sprite,0,var);
+	_type = var;
+}
+
+CCSize Cannon::getSize()
+{
+	CCSprite* cannonSprite = (CCSprite*) _cannonSprites->objectAtIndex(_type);
+	return cannonSprite->getContentSize();
+}
+float Cannon::getFireRange()
+{
+	CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+	double temp = pow(winSize.width/2, 2) + pow(winSize.height, 2);
+	double result = sqrt(temp);
+	return result/7*(_type+1)+500;
+}
+
 void Cannon::aimAt(CCPoint target)
 {
-    CCPoint location = this->getParent()->convertToWorldSpace(this->getPosition());
-    float angle = ccpAngleSigned(ccpSub(target, location), CCPointMake(0, 1));
-    this->setRotation(CC_RADIANS_TO_DEGREES(angle));
-}
-Cannon::Cannon()
-{
-    _type = (CannonType)k_Cannon_Type_Invalid;
-}
-Cannon::~Cannon()
-{
-    CC_SAFE_RELEASE(_cannonSprites);
+/*	if(target.y < 0)
+	{
+		target.y = 0.0f;
+	}
+*/
+	CCPoint location = getParent()->convertToWorldSpace(getPosition());
+	float angle = ccpAngleSigned(ccpSub(target, location), CCPointMake(0, 1));
+	if(abs(angle)>(3.14/2))
+	{
+		angle=angle>0?(3.14/2):-(3.14/2);
+	}
+	this->setRotation(CC_RADIANS_TO_DEGREES(angle));
 }

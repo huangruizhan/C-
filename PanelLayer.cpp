@@ -1,45 +1,46 @@
 #include "PanelLayer.h"
 #include "GameScene.h"
-#include "StaticData.h"
-#include "ScheduleCountDown.h"
+
 USING_NS_CC;
+PanelLayer::PanelLayer(void)
+{
+
+}
+
+PanelLayer::~PanelLayer(void)
+{
+
+}
 bool PanelLayer::init()
 {
-    if(CCLayer::init()){
-        CCSize winSize = CCDirector::sharedDirector()->getWinSize();
-        
-        _goldCounterLayer = GoldCounterLayer::create();
-        this->addChild(_goldCounterLayer);
+	if(!CCLayer::init())
+	{
+		return false;
+	}
 
-       ScheduleCountDown* scheduleCountDown = ScheduleCountDown::create(this);
-        _scheduleLabel = CCLabelTTF::create("60", "Thonburi", 40);
-        _scheduleLabel->addChild(scheduleCountDown);
-        this->addChild(_scheduleLabel);
-		
-        CCMenuItemSprite* pause = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName(STATIC_DATA_STRING("pause_normal")), CCSprite::createWithSpriteFrameName(STATIC_DATA_STRING("pause_selected")),this,menu_selector(PanelLayer::pause));
-        CCMenu* menu = CCMenu::create(pause, NULL);
-		menu->setPosition(CCPointMake(winSize.width*0.95,winSize.height*0.9));
-		this->addChild(menu);
-        
-        _goldCounterLayer->setPosition(CCPointMake(winSize.width*0.05, winSize.height*0.05));
-        _scheduleLabel->setPosition(CCPointMake(winSize.width*0.3, winSize.height*0.05));
-        CCSize pauseSize = pause->getContentSize();
-        menu->setPosition(CCPointMake(winSize.width-pauseSize.width*0.5, pauseSize.height*0.5));
-        return true;
-    }
-    return false;
+	_goldCounter = GoldCounterLayer::create(0);
+	addChild(_goldCounter);
+	_goldCounter->setPosition(ccp(600, 17));
+	
+	int maxTime =10;
+	ScheduleCountDown *countDown =ScheduleCountDown::create(this,maxTime,true);
+	addChild(countDown,0, 99);
+	_scheduleLabel=CCLabelAtlas::create(CCString::createWithFormat("%d",maxTime)->getCString(),"baoshiyu_shuzi_02-ipadhd.png",50,54,'0');
+	addChild(_scheduleLabel);
+	_scheduleLabel->setPosition(ccp(100,1200));
+    return true;
 }
-void PanelLayer::pause(cocos2d::CCObject* pSender)
+void PanelLayer::scheduleTimeUp()
 {
-	GameScene* gameScene = (GameScene*)this->getParent();
-    gameScene->pause();
+	((GameScene *)getParent())->alterGold(200);
+	ScheduleCountDown *countDown =(ScheduleCountDown *)getChildByTag(99);
+	if(countDown->getLoop()==false)
+	{
+		_scheduleLabel->setVisible(false);
+	}
 }
-void __stdcall PanelLayer::scheduleTimeUp()
+void PanelLayer::setScheduleNumber(int number)
 {
-    GameScene* gameScene = (GameScene*)this->getParent();
-    gameScene->scheduleTimeUp();
-}
-void __stdcall PanelLayer::setScheduleNumber(int number)
-{
-    _scheduleLabel->setString(CCString::createWithFormat("%d",number)->getCString());
+	//CCLabelAtlas *label =(CCLabelAtlas *)getChildByTag(99);
+	_scheduleLabel->setString(CCString::createWithFormat("%d",number)->getCString());
 }

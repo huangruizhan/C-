@@ -1,21 +1,27 @@
-#ifndef __FishingJoy__ScheduleCountDown__
-#define __FishingJoy__ScheduleCountDown__
+﻿#pragma once
+#ifndef _SCHEDULECOUNTDOWN_H
+#define _SCHEDULECOUNTDOWN_H
 #include "cocos2d.h"
-#include "ScheduleCounterProtocol.h"
-
-class ScheduleCountDown : public cocos2d::CCNode
+#include "ScheduleCounterDelegate.h"
+USING_NS_CC;
+class ScheduleCountDown:public CCNode
 {
 public:
-    static ScheduleCountDown* create(ScheduleCounterDelegate* target, int perimeter = 99, bool loop = true);
-    bool init(ScheduleCounterDelegate* target, int perimeter = 60, bool loop = true);
-    CC_SYNTHESIZE(bool, _loop, Loop);
+	static ScheduleCountDown* create(ScheduleCounterDelegate* target, int perimeter, bool loop);
+	CC_SYNTHESIZE(int,_currentTime,CurrentTime);
+	CC_SYNTHESIZE(int,_maxTime,MaxTime);
+	CC_SYNTHESIZE(bool,_loop,Loop);
+	CC_SYNTHESIZE(ScheduleCounterDelegate *,_target,Target);
+	void schedulePerSecond(float delta);
 protected:
-    ScheduleCounterDelegate* _target;
-    //当前时间
-    int _curTime;
-    //最大时间
-    int _maxTime;
-   void schedulePerSecond();
+	bool init (ScheduleCounterDelegate* target, int perimeter, bool loop);
+	
+	/*ScheduleCounterDelegate* _target;
+	int _currentTime;
+	int _maxTime;
+	bool _loop;*/
+private:
+
 };
 
 #endif

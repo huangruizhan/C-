@@ -1,36 +1,30 @@
-#ifndef __FishingJoy__Weapon__
-#define __FishingJoy__Weapon__
+#pragma once
 #include "cocos2d.h"
 #include "Cannon.h"
 #include "Bullet.h"
-#include "FishingNet.h"
-enum{
-    k_Weapon_Status_None = 0,
-    k_Weapon_Status_Bullet,
-    k_Weapon_Status_FishingNet
-};
-class Weapon : public cocos2d::CCNode
+#include "FishNet.h"
+#include "PersonalAudioEngine.h"
+USING_NS_CC;
+
+#define _WEAPON_H
+
+class Weapon :
+	public CCNode
 {
 public:
-    static Weapon* create(CannonType type = k_Cannon_Type_1);
-    bool init(CannonType type = k_Cannon_Type_1);
-    
-    //控制函数
-    bool shootTo(cocos2d::CCPoint touchLocation);
-    void aimAt(cocos2d::CCPoint target);
-
-    cocos2d::CCPoint getCollisionPoint();
-    cocos2d::CCRect getCollisionArea();
-    void end();
-    
-    CC_SYNTHESIZE_READONLY(Cannon*, _cannon, Cannon);
-    CC_SYNTHESIZE_READONLY(Bullet*, _bullet, Bullet);
-    CC_SYNTHESIZE_READONLY(FishingNet*, _fishingNet, FishingNet);
-    int getCannonType();
-    int weaponStatus();
+	static Weapon* create(CannonType type = k_Cannon_Type_1);
+	bool init(CannonType type = k_Cannon_Type_1);
+	CannonType getCannonType();
+	CCSize getCannonSize();
+	void changeCannon(CannonOperate operate);
+	~Weapon(void);
+	void aimAt(CCPoint target);
+	void shootTo(CCPoint target);
+	CCRect getCollisionArea(Bullet* bullet);
 protected:
-    //通过ParticleDesigner加载的粒子效果
-    cocos2d::CCParticleSystemQuad* _particle;
+	CC_SYNTHESIZE_READONLY(Cannon*, _cannon, Cannon);
+	CC_SYNTHESIZE_READONLY(CCArray*, _bullets, Bullets);
+	CC_SYNTHESIZE_READONLY(CCArray*, _fishNets, FishNets);
+	CC_SYNTHESIZE_READONLY(CCArray*, _particils, CCParticleSystemQuad);
+	Bullet* getBulletToShoot();
 };
-
-#endif 

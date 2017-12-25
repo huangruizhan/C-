@@ -1,21 +1,21 @@
-#ifndef __FishingJoy__Bullet__
-#define __FishingJoy__Bullet__
+#pragma once
 #include "cocos2d.h"
-class Bullet : public cocos2d::CCNode
+USING_NS_CC;
+
+#define _BULLET_H
+
+class Bullet :
+	public CCNode
 {
 public:
-    CREATE_FUNC(Bullet);
-    bool init();
-    
-    //子弹飞行
-    void flyTo(cocos2d::CCPoint target,int cannonType);
-    //使子弹结束飞行
-    void end();
-    
-    cocos2d::CCPoint getCollisionPoint();
-
+	Bullet(void);
+	virtual ~Bullet(void);
+	CREATE_FUNC(Bullet);
+	bool init();
+	void end();
+	void flyTo(CCPoint targetInWorldSpace, int type/* =0 */);
+	CCPoint getCollosionPoint();
 protected:
-    cocos2d::CCSprite* _bulletSprite;
+	float getSpeed(int type);
+	CCSprite* _bulletSprite;
 };
-
-#endif /* defined(__FishingJoy__Bullet__) */
